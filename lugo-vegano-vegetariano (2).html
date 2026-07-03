@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VegiLugo — Guía vegana y vegetariana de Lugo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;1,500&family=Karla:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--bg:#090F0A;--s1:#0F1F11;--s2:#182B1A;--bd:#223325;--lime:#A3E635;--amb:#F59E0B;--coral:#F87171;--teal:#34D399;--txt:#F0F4EC;--dim:#7DAB79;--mut:#4A6E47}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font-family:'Karla',sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:900px;margin:0 auto;padding:0 16px 60px}
+.badge{display:inline-flex;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:.62rem;font-weight:600;padding:2px 7px;border-radius:3px}
+.badge.vn{background:var(--lime);color:#090F0A}.badge.vg{background:var(--teal);color:#090F0A}
+.hero{position:relative;border-radius:20px;overflow:hidden;padding:52px 28px 36px;margin-bottom:22px;
+  background:linear-gradient(135deg,rgba(9,15,10,.96),rgba(12,28,14,.91)),
+  url('https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=1400&auto=format&fit=crop&q=55') center/cover}
+.deco{position:absolute;pointer-events:none;font-size:2rem;opacity:.11;line-height:1}
+.d1{top:18px;right:220px;transform:rotate(-15deg)}.d2{top:28px;right:140px;transform:rotate(8deg);font-size:1.6rem}
+.d3{top:55px;right:65px;transform:rotate(22deg);font-size:1.4rem}.d4{bottom:28px;right:170px;transform:rotate(-8deg);font-size:1.9rem}
+.d5{bottom:18px;right:60px;transform:rotate(12deg);font-size:2.2rem}
+.logo{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(3.2rem,10vw,5.5rem);line-height:1;margin-bottom:6px;position:relative;z-index:1}
+.lv1{color:var(--lime);font-style:italic}.lv2{color:var(--txt)}
+.hero-tag{color:rgba(240,244,236,.5);font-family:'IBM Plex Mono',monospace;font-size:.8rem;letter-spacing:.04em;margin-bottom:16px;position:relative;z-index:1}
+#sbar{display:flex;gap:14px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:.71rem;margin-bottom:14px;position:relative;z-index:1}
+.st{display:flex;align-items:center;gap:5px;color:var(--dim)}.st strong{color:var(--txt)}
+.odot{width:7px;height:7px;border-radius:50%;background:var(--teal);animation:pulse 2s infinite;display:inline-block}
+.lgd{display:flex;gap:12px;flex-wrap:wrap;position:relative;z-index:1}
+.li{display:flex;align-items:center;gap:6px;font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--dim)}
+.controls{position:sticky;top:0;background:var(--bg);padding:14px 0 10px;z-index:20;border-bottom:1px solid var(--bd);margin-bottom:16px}
+.ctop2{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+#srch{flex:1;background:var(--s1);border:1px solid var(--bd);border-radius:10px;color:var(--txt);font-family:'IBM Plex Mono',monospace;font-size:.86rem;padding:9px 14px;outline:none;transition:border-color .15s}
+#srch::placeholder{color:var(--dim);opacity:.5}#srch:focus{border-color:var(--lime)}
+.vt{display:flex;background:var(--s1);border:1px solid var(--bd);border-radius:10px;overflow:hidden;flex-shrink:0}
+.vtb{background:none;border:none;color:var(--dim);font-family:'IBM Plex Mono',monospace;font-size:.7rem;padding:9px 13px;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap}
+.vtb.active{background:var(--lime);color:#090F0A;font-weight:600}
+#chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:7px}
+.chip{font-family:'IBM Plex Mono',monospace;font-size:.67rem;letter-spacing:.04em;text-transform:uppercase;background:transparent;border:1px solid var(--bd);color:var(--dim);padding:5px 10px;border-radius:999px;cursor:pointer;transition:all .15s}
+.chip:hover{border-color:var(--lime);color:var(--txt);transform:translateY(-1px)}
+.chip[data-cat="todos"][aria-pressed="true"]{background:var(--s2);border-color:var(--lime);color:var(--lime)}
+.chip[data-cat="vegano"][aria-pressed="true"]{background:#A3E635;border-color:#A3E635;color:#090F0A}
+.chip[data-cat="pizzeria"][aria-pressed="true"]{background:#FBBF24;border-color:#FBBF24;color:#090F0A}
+.chip[data-cat="italiano"][aria-pressed="true"]{background:#FB923C;border-color:#FB923C;color:#090F0A}
+.chip[data-cat="hamburguesas"][aria-pressed="true"]{background:#F87171;border-color:#F87171;color:#090F0A}
+.chip[data-cat="asiatico"][aria-pressed="true"]{background:#60A5FA;border-color:#60A5FA;color:#090F0A}
+.chip[data-cat="mexicano"][aria-pressed="true"]{background:#34D399;border-color:#34D399;color:#090F0A}
+.chip[data-cat="indio"][aria-pressed="true"]{background:#C084FC;border-color:#C084FC;color:#090F0A}
+.chip[data-cat="ecologico"][aria-pressed="true"]{background:#86EFAC;border-color:#86EFAC;color:#090F0A}
+.chip[data-cat="saludable"][aria-pressed="true"]{background:#10B981;border-color:#10B981;color:#090F0A}
+.chip[data-cat="cafe"][aria-pressed="true"]{background:#F59E0B;border-color:#F59E0B;color:#090F0A}
+.chip[data-cat="kebab"][aria-pressed="true"]{background:#D97706;border-color:#D97706;color:#090F0A}
+.chip[data-cat="favs"][aria-pressed="true"]{background:#F87171;border-color:#F87171;color:#090F0A}
+#cbar{font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--mut)}
+#vm{display:none}#vm.show{display:block}
+#map{height:520px;border-radius:14px;overflow:hidden;border:1px solid var(--bd);margin-top:8px}
+#merr{text-align:center;padding:40px;color:var(--dim);display:none;font-family:'IBM Plex Mono',monospace}
+.leaflet-popup-content-wrapper{background:#182B1A!important;border:1px solid #223325!important;border-radius:10px!important;color:#F0F4EC!important}
+.leaflet-popup-tip{background:#182B1A!important}
+#vl{display:block}#vl.gone{display:none}
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:18px}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.card{border-radius:16px;overflow:hidden;display:flex;flex-direction:column;
+  border-left:4px solid var(--cc,var(--lime));
+  animation:rise .42s ease backwards;
+  transition:transform .22s,box-shadow .22s;background:var(--s1)}
+.card:hover{transform:translateY(-5px);box-shadow:0 16px 48px rgba(0,0,0,.5)}
+.card[data-cat="vegano"]{--cc:#A3E635}.card[data-cat="pizzeria"]{--cc:#FBBF24}
+.card[data-cat="italiano"]{--cc:#FB923C}.card[data-cat="hamburguesas"]{--cc:#F87171}
+.card[data-cat="asiatico"]{--cc:#60A5FA}.card[data-cat="mexicano"]{--cc:#34D399}
+.card[data-cat="indio"]{--cc:#C084FC}.card[data-cat="ecologico"]{--cc:#86EFAC}
+.card[data-cat="saludable"]{--cc:#10B981}.card[data-cat="cafe"]{--cc:#F59E0B}
+.card[data-cat="kebab"]{--cc:#D97706}
+.cts{position:relative;height:230px;overflow:hidden;
+  background:linear-gradient(135deg,var(--s1),var(--s2));
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ci-link{position:absolute;inset:0;z-index:1;display:block;cursor:pointer}
+.ci-link::after{content:'';position:absolute;inset:0;background:rgba(163,230,53,.1);opacity:0;transition:opacity .3s}
+.cts:hover .ci-link::after{opacity:1}
+.ci{width:100%;height:100%;object-fit:cover;display:block;transition:transform .55s;position:absolute}
+.card:hover .ci{transform:scale(1.07)}
+.cif{position:absolute;font-size:3.5rem;opacity:0;z-index:0;pointer-events:none}
+.cts.img-err .cif{opacity:.3}.cts.img-err .ci{display:none}
+.cov{position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(to top,rgba(9,15,10,1) 0%,rgba(9,15,10,.7) 38%,rgba(9,15,10,.1) 72%,transparent 100%)}
+.hb{position:absolute;top:11px;right:11px;z-index:10;background:rgba(0,0,0,.58);
+  border:none;border-radius:50%;width:38px;height:38px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:1.1rem;backdrop-filter:blur(6px);transition:transform .15s}
+.hb:hover{transform:scale(1.18)}.hb.fav{background:rgba(248,113,113,.35)}
+.ctb{position:absolute;top:11px;left:12px;right:58px;z-index:5}
+.tag{font-family:'IBM Plex Mono',monospace;font-size:.63rem;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--cc);background:rgba(0,0,0,.62);backdrop-filter:blur(4px);
+  padding:3px 8px;border-radius:6px}
+.cns{position:absolute;bottom:8px;left:0;right:0;padding:0 14px 14px;z-index:5}
+.mrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.rating{font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--amb);
+  background:rgba(0,0,0,.55);backdrop-filter:blur(4px);padding:2px 7px;border-radius:6px}
+.sw{display:flex;align-items:center;gap:4px}
+.sdot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.sdot.open{background:var(--teal);animation:pulse 2s infinite}.sdot.closed{background:var(--coral)}
+.stxt{font-family:'IBM Plex Mono',monospace;font-size:.67rem}
+.stxt.open{color:var(--teal)}.stxt.closed{color:var(--coral)}.stxt.unknown{color:var(--mut)}
+.vsc{display:flex;align-items:center;gap:5px;margin-bottom:5px}
+.lvs{display:flex;gap:2px}
+.vsl{font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:rgba(255,255,255,.65)}
+.card h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.3rem;line-height:1.1;margin-bottom:3px;text-shadow:0 2px 10px rgba(0,0,0,.7)}
+.card h2 a{color:var(--txt);text-decoration:none;transition:color .15s}
+.card h2 a:hover{color:var(--cc)}.ar{font-size:.7em;opacity:.45}
+.adr{font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:rgba(255,255,255,.55)}
+.cds{padding:14px 14px 18px;flex:1;border-top:1px solid var(--bd)}
+.dlbl{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.09em;text-transform:uppercase;color:var(--mut);margin-bottom:6px}
+.dl{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.dish{display:flex;align-items:flex-start;gap:6px;font-size:.87rem;line-height:1.35}
+.dish .badge{margin-top:3px}.desc{font-size:.85rem;opacity:.62}
+.note{display:block;font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--amb);margin-top:7px;border-left:2px solid rgba(245,158,11,.4);padding-left:8px}
+.price{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--lime);border-bottom:1px solid var(--lime);margin-top:8px}
+#empty{color:var(--dim);font-style:italic;padding:30px 4px;display:none}
+.foot{font-family:'IBM Plex Mono',monospace;font-size:.71rem;color:var(--mut);line-height:1.65;padding-top:14px;border-top:1px solid var(--bd);margin-top:28px}
+@media(max-width:640px){.list{grid-template-columns:1fr}.cts{height:200px}.hero{padding:36px 18px 24px}.d3,.d4,.d5{display:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero" role="banner">
+  <span class="deco d1" aria-hidden="true">🥗</span>
+  <span class="deco d2" aria-hidden="true">🍕</span>
+  <span class="deco d3" aria-hidden="true">🍜</span>
+  <span class="deco d4" aria-hidden="true">🌮</span>
+  <span class="deco d5" aria-hidden="true">🧆</span>
+  <div class="logo"><span class="lv1">Vegi</span><span class="lv2">Lugo</span></div>
+  <p class="hero-tag">GUÍA VEGETARIANA &amp; VEGANA · LUGO</p>
+  <div id="sbar"></div>
+  <div class="lgd">
+    <div class="li"><span class="badge vn">V</span> Vegano &mdash; sin productos animales</div>
+    <div class="li"><span class="badge vg">Veg</span> Vegetariano &mdash; sin carne ni pescado</div>
+  </div>
+</header>
+<div class="controls">
+  <div class="ctop2">
+    <input type="text" id="srch" placeholder="Buscar local o plato…" autocomplete="off">
+    <div class="vt" role="group">
+      <button class="vtb active" id="bl">📋 Lista</button>
+      <button class="vtb" id="bm">🗺 Mapa</button>
+    </div>
+  </div>
+  <div id="chips" role="group" aria-label="Filtrar por categoría"></div>
+  <div id="cbar"></div>
+</div>
+<div id="vl"><div class="list" id="list"></div><p id="empty"></p></div>
+<div id="vm"><div id="map"></div><p id="merr">Necesitas conexión para ver el mapa.</p></div>
+<footer><p class="foot">Información cruzada de Google Maps, reseñas y prensa local · julio 2026. Cartas y horarios pueden cambiar &mdash; confirmar antes de ir. El estado abierto/cerrado usa la hora de tu dispositivo.</p></footer>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+const P=[{"k":"a-seimeira","n":"A Seimeira","cat":"vegano","catL":"100% Vegano","img":"1512621776951-a57141f2eefd","fb":"🥗","rating":null,"vs":5,"coords":[43.0114534,-7.5513578],"addr":"Rúa Carril das Flores, 30","maps":"https://www.google.com/maps/search/?api=1&query=A%20Seimeira%2C%20R%C3%BAa%20Carril%20das%20Flores%2C%2030%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Callos veganos","t":"vegan"},{"n":"Sopa de miso","t":"vegan"},{"n":"Puré de verduras de temporada","t":"vegan"},{"n":"Pasta boloñesa vegana","t":"vegan"},{"n":"Schnitzel de garbanzos y quinoa","t":"vegan"},{"n":"Albóndigas de quinoa","t":"vegan"},{"n":"Croquetas de espinaca y champiñón","t":"vegan"},{"n":"Tarta casera vegana (postre)","t":"vegan"}],"desc":"El único local 100% vegano de la ciudad. Todo en carta es vegano; menú que cambia a diario.","note":null,"price":"Menú 15 € · Medio menú 9,50 €","hours":[[[11,17]],[],[],[],[],[[9.5,17],[21,23.5]],[[11,17]]],"web":null},{"k":"trece-pizzas","n":"TRECE PIZZAS","cat":"pizzeria","catL":"Pizzería","img":"1598023696416-0193a0bcd302","fb":"🍕","rating":"4.8","vs":2,"coords":[43.0068,-7.5542],"addr":"Ronda das Fontiñas, 87","maps":"https://www.google.com/maps/search/?api=1&query=TRECE%20PIZZAS%2C%20Ronda%20das%20Fonti%C3%B1as%2C%2087%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Pizza Margherita (tomate, mozzarella, albahaca)","t":"veg"},{"n":"Pizza Cuatro Quesos","t":"veg"},{"n":"Pizza de verduras de temporada","t":"veg"}],"desc":"Pizza americana de masa gruesa. Una de las mejor valoradas de Lugo.","note":null,"price":null,"hours":[[[13,16],[20,23.5]],[[13,16],[20,23.5]],[],[[20,23.5]],[[13,16],[20,23.5]],[[13,16],[20,23.5]],[[13,16],[20,23.5]]],"web":null},{"k":"dolce-vita","n":"Dolce Vita Pizzeria","cat":"pizzeria","catL":"Pizzería","img":"1564936281291-294551497d81","fb":"🍕","rating":"4.5","vs":2,"coords":[43.0099,-7.5565],"addr":"Praza Maior, 19","maps":"https://www.google.com/maps/search/?api=1&query=Dolce%20Vita%20Pizzeria%2C%20Praza%20Maior%2C%2019%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Pizza Margherita","t":"veg"},{"n":"Pizza vegetariana","t":"veg"},{"n":"Pizzas por porción para llevar","t":"veg"}],"desc":"Pizzería italiana en plena Praza Maior. Muy valorada por lugareños y peregrinos.","note":null,"price":null,"hours":[[[12,16],[18,24]],[[12,16],[18,24]],[[12,16],[18,24]],[[12,16],[18,24]],[[12,16],[18,24]],[[12,16],[18,24]],[[12,16],[18,24]]],"web":null},{"k":"el-tata","n":"Pizzas y Empanadas El Tata","cat":"pizzeria","catL":"Pizzería","img":"1604068549290-dea0e4a305ca","fb":"🥟","rating":"4.8","vs":4,"coords":[43.0148,-7.5528],"addr":"Av. da Coruña, 14","maps":"https://www.google.com/maps/search/?api=1&query=Pizzas%20y%20Empanadas%20El%20Tata%2C%20Av.%20da%20Coru%C3%B1a%2C%2014%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Empanada vegana casera (¡confirmada!)","t":"vegan"},{"n":"Pizza Margherita","t":"veg"},{"n":"Pizza vegetariana","t":"veg"}],"desc":"Eduardo \"El Tata\" lo prepara todo artesanal. Las empanadas veganas son las más elogiadas.","note":"Cantidades limitadas — llama antes: +34 605 64 92 28","price":null,"hours":[[[10,15],[19.5,24]],[[10,15],[19.5,22]],[[10,15],[19.5,22]],[[10,15],[19.5,22]],[[10,15],[19.5,23]],[[10,15],[19.5,24]],[[10,15],[19.5,24]]],"web":null},{"k":"brooklyn","n":"Brooklyn Pizzería","cat":"pizzeria","catL":"Pizzería","img":"1595854341625-f33ee10dbf94","fb":"🍕","rating":"4.8","vs":2,"coords":[43.0092,-7.5561],"addr":"Rúa San Roque, 34","maps":"https://www.google.com/maps/search/?api=1&query=Brooklyn%20Pizzer%C3%ADa%2C%20R%C3%BAa%20San%20Roque%2C%2034%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Pizza Margherita","t":"veg"},{"n":"Pizza Cuatro Quesos","t":"veg"},{"n":"Pizzas vegetarianas con ingredientes frescos","t":"veg"}],"desc":"Masa de calidad, ingredientes frescos, buen trato. Abre en tarde cuando la mayoría cierra.","note":null,"price":null,"hours":[[[12,16],[20,24]],[],[[12,16],[20,24]],[[12,16],[20,24]],[[12,16],[20,24]],[[12,16],[20,24]],[[12,16],[20,24]]],"web":null},{"k":"toscana","n":"Pizzería Toscana","cat":"pizzeria","catL":"Pizzería","img":"1664309641932-0e03e0771b97","fb":"🍕","rating":"4.8","vs":2,"coords":[43.0084,-7.5478],"addr":"Av. Marqués de Ombreiro, 38","maps":"https://www.google.com/maps/search/?api=1&query=Pizzer%C3%ADa%20Toscana%2C%20Av.%20Marqu%C3%A9s%20de%20Ombreiro%2C%2038%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Pizza Margherita","t":"veg"},{"n":"Pizza Cuatro Quesos","t":"veg"},{"n":"Pizza vegetariana personalizable","t":"veg"}],"desc":"Para muchos, la mejor pizzería de Lugo. Masa napolitana, ingredientes premium. Solo efectivo.","note":"Solo efectivo. Cerrada lunes y martes.","price":null,"hours":[[[13.5,16],[20,23.5]],[],[],[[13.5,16],[20,23.5]],[[13.5,16],[20,23.5]],[[13.5,16],[20,23.5]],[[13.5,16],[20,23.5]]],"web":null},{"k":"el-nonno","n":"El Nonno Pizzeria","cat":"pizzeria","catL":"Pizzería","img":"1682264788192-9abdec90c425","fb":"🍕","rating":"4.5","vs":2,"coords":[43.0218,-7.5478],"addr":"Av. da Coruña, 123","maps":"https://www.google.com/maps/search/?api=1&query=El%20Nonno%20Pizzeria%2C%20Av.%20da%20Coru%C3%B1a%2C%20123%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Pizza Vegetariana (explícita en carta)","t":"veg"},{"n":"Pizza Margherita","t":"veg"},{"n":"Pizza Cuatro Quesos","t":"veg"}],"desc":"La pizza vegetariana aparece explícitamente en carta. Abierto casi todos los días.","note":null,"price":null,"hours":[[[9,23.5]],[],[[9,23.5]],[[9,23.5]],[[9,23.5]],[[9,23.5]],[[9,23.5]]],"web":null},{"k":"cousa-nostra","n":"Pizzería Cousa Nostra","cat":"pizzeria","catL":"Pizzería","img":"1579751626657-72bc17010498","fb":"🍕","rating":"4.6","vs":2,"coords":[43.0063,-7.5512],"addr":"Praza Augas Férreas, 12","maps":"https://www.google.com/maps/search/?api=1&query=Pizzer%C3%ADa%20Cousa%20Nostra%2C%20Praza%20Augas%20F%C3%A9rreas%2C%2012%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Pizza Margherita","t":"veg"},{"n":"Panzerotti de Cuatro Quesos","t":"veg"},{"n":"Provoletta gratinada","t":"veg"},{"n":"Cannoli siciliano (postre)","t":"veg"}],"desc":"Clásico de Lugo con décadas de historia. Los panzerottis de queso son legendarios.","note":null,"price":null,"hours":[[[13,15.75],[19,23.5]],[[19,23.5]],[],[[19,23.5]],[[19,23.5]],[[13,15.75],[19,23.5]],[[13,15.75],[19,23.5]]],"web":null},{"k":"peppino","n":"Peppino Century","cat":"pizzeria","catL":"Pizzería","img":"1574071318508-1cdbab80d002","fb":"🍕","rating":"3.5","vs":3,"coords":[43.0084849,-7.5542995],"addr":"Praza da Constitución, 1","maps":"https://www.google.com/maps/search/?api=1&query=Peppino%20Century%2C%20Praza%20da%20Constituci%C3%B3n%2C%201%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Pizza vegana (queso vegetal + verduras)","t":"vegan"},{"n":"Pizza Margherita","t":"veg"},{"n":"Pizza vegetariana","t":"veg"},{"n":"Lasaña vegetariana","t":"veg"}],"desc":"Cafetería-pizzería. Una de las pocas con pizza vegana confirmada en carta. Ideal para desayunar en el centro.","note":null,"price":null,"hours":[[[8,24]],[[6.5,24]],[[6.5,24]],[[6.5,24]],[[6.5,24]],[[6.5,24]],[[8,24]]],"web":null},{"k":"pizzeria-mangiarte","n":"Pizzería Mangiarte","cat":"pizzeria","catL":"Pizzería","img":"1589187151053-5ec8818e661b","fb":"🍕","rating":"4.6","vs":2,"coords":[43.0088,-7.5531],"addr":"Rúa Miguel de Cervantes, 13","maps":"https://www.google.com/maps/search/?api=1&query=Pizzer%C3%ADa%20Mangiarte%2C%20R%C3%BAa%20Miguel%20de%20Cervantes%2C%2013%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Pizza de masa fina con tomate y mozzarella","t":"veg"},{"n":"Pizza Cuatro Quesos","t":"veg"},{"n":"Pizza vegetariana de temporada","t":"veg"}],"desc":"Para muchos lugareños, la mejor pizza de Lugo. Solo 4-5 mesas. No hay reparto a domicilio.","note":"No reservas — llegar nada más abrir.","price":null,"hours":[[],[],[],[[20,24]],[[20,24]],[[20,24]],[[20,24]]],"web":null},{"k":"piccolo","n":"Pizzería Píccolo","cat":"pizzeria","catL":"Pizzería","img":"1565299624946-b28f40a0ae38","fb":"🍕","rating":"4.4","vs":2,"coords":[43.0069,-7.5536],"addr":"Ronda das Fontiñas, 87","maps":"https://www.google.com/maps/search/?api=1&query=Pizzer%C3%ADa%20P%C3%ADccolo%2C%20Ronda%20das%20Fonti%C3%B1as%2C%2087%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Pizza Margherita","t":"veg"},{"n":"Pizza Cuatro Quesos","t":"veg"},{"n":"Espaguetis con espinacas y aceite aromatizado","t":"veg"},{"n":"Gnocchi (consultar)","t":"veg"}],"desc":"Pizzería italiana con pastas vegetarianas. Buen menú y ambiente acogedor.","note":null,"price":null,"hours":[[[13,16],[20,24]],[[13,16]],[],[[13,16],[20,24]],[[13,16],[20,24]],[[13,16],[20,24]],[[13,16],[20,24]]],"web":null},{"k":"pizzeria-toto","n":"La Pizzería di Totó","cat":"pizzeria","catL":"Pizzería","img":"1600028068383-ea11a7a101f3","fb":"🍕","rating":"4.8","vs":2,"coords":[42.9948349,-7.5531456],"addr":"Av. de Magoi, 106","maps":"https://www.google.com/maps/search/?api=1&query=La%20Pizzer%C3%ADa%20di%20Tot%C3%B3%2C%20Av.%20de%20Magoi%2C%20106%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Pizza sin carne (varias en carta)","t":"veg"},{"n":"Ensalada de burrata con tomate y albahaca","t":"veg"},{"n":"Tiramisú (postre)","t":"veg"}],"desc":"Una de las más queridas de Lugo (4.8, casi 1.000 reseñas). La burrata es imprescindible.","note":"Algo alejada del centro.","price":null,"hours":[[[20.5,24]],[],[[20.5,24]],[[20.5,24]],[[20.5,24]],[[20.5,24]],[[20.5,24]]],"web":null},{"k":"farabutto-centro","n":"Il Farabutto Centro","cat":"italiano","catL":"Italiano","img":"1702716059239-385baacdabdc","fb":"🍝","rating":"4.7","vs":2,"coords":[43.0131052,-7.5548234],"addr":"Ronda da Muralla, 54","maps":"https://www.google.com/maps/search/?api=1&query=Il%20Farabutto%20Centro%2C%20Ronda%20da%20Muralla%2C%2054%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Pizza de calabacín y manzana (dulce-salada)","t":"veg"},{"n":"Ensalada de queso de cabra con miel","t":"veg"},{"n":"Lasaña vegetariana","t":"veg"},{"n":"Pan de la casa artesanal","t":"veg"}],"desc":"Restaurante italiano con vistas a la muralla (4.7, +1.000 reseñas). Sirven limoncello de cortesía.","note":"Cerrado los lunes.","price":null,"hours":[[[13,16]],[],[[13,16]],[[13,16],[20.5,23.5]],[[13,16],[20.5,23.5]],[[13,16],[20.5,23.5]],[[13,16],[20.5,23.5]]],"web":null},{"k":"farabutto-fluvial","n":"Il Farabutto Fluvial","cat":"italiano","catL":"Italiano","img":"1549118060-fd6cb65d5a15","fb":"🍝","rating":"4.5","vs":2,"coords":[43.0043,-7.5617],"addr":"Rúa Fermín Rivera, s/n","maps":"https://www.google.com/maps/search/?api=1&query=Il%20Farabutto%20Fluvial%2C%20R%C3%BAa%20Ferm%C3%ADn%20Rivera%2C%20s/n%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Pizza de calabacín y manzana (confirmada)","t":"veg"},{"n":"Ensalada de queso de cabra con miel","t":"veg"},{"n":"Pasta vegetariana","t":"veg"},{"n":"Risotto de verduras (según disponibilidad)","t":"veg"}],"desc":"Local grande junto al río Miño, con terraza. Más de 2.200 reseñas. Abierto todos los días.","note":null,"price":null,"hours":[[[8,24]],[[8,24]],[[8,24]],[[8,24]],[[8,24]],[[8,24]],[[8,24]]],"web":null},{"k":"mangiarte","n":"Mangiarte Pasta Fresca","cat":"italiano","catL":"Italiano","img":"1551183053-bf91798d765e","fb":"🍝","rating":"4.2","vs":2,"coords":[43.01,-7.557],"addr":"Rúa Quiroga Ballesteros, 1 — Mercado Municipal","maps":"https://www.google.com/maps/search/?api=1&query=Mangiarte%20Pasta%20Fresca%2C%20R%C3%BAa%20Quiroga%20Ballesteros%2C%201%20%E2%80%94%20Mercado%20Municipal%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Pasta fresca con verduras de temporada (diaria)","t":"veg"},{"n":"Pasta vegetariana (según disponibilidad)","t":"veg"}],"desc":"Pasta artesanal en el Mercado Municipal. Carta corta que cambia cada día.","note":"Preguntar qué opción sin carne hay ese día.","price":null,"hours":[[],[],[[9,16]],[[9,16]],[[9,16]],[[9,16]],[[9,16]]],"web":null},{"k":"legends-cafe","n":"Legends Café","cat":"hamburguesas","catL":"Hamburguesas","img":"1568901346375-23c9450c58cd","fb":"🍔","rating":null,"vs":5,"coords":[43.0098239,-7.5582883],"addr":"Rúa Bispo Basulto, 8 (Bajo)","maps":"https://www.google.com/maps/search/?api=1&query=Legends%20Caf%C3%A9%2C%20R%C3%BAa%20Bispo%20Basulto%2C%208%20%28Bajo%29%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Burger vegana de garbanzos (con mayonesa vegana)","t":"vegan"},{"n":"Burger de grelos con cuscús y nueces","t":"vegan"},{"n":"Hummus con picos","t":"vegan"},{"n":"Falafel","t":"vegan"},{"n":"Pizza vegana de berenjena y pera","t":"vegan"},{"n":"Tapeo vegano los jueves","t":"vegan"}],"desc":"Hamburguesería junto a la catedral con la carta vegana más amplia de la ciudad.","note":null,"price":null,"hours":null,"web":null},{"k":"la-urbana-1","n":"La Urbana · Bispo Aguirre","cat":"hamburguesas","catL":"Hamburguesas","img":"1550547660-d9054522f887","fb":"🍔","rating":null,"vs":3,"coords":[43.0073925,-7.5563978],"addr":"Rúa Bispo Aguirre, 34","maps":"https://www.google.com/maps/search/?api=1&query=La%20Urbana%20%C2%B7%20Bispo%20Aguirre%2C%20R%C3%BAa%20Bispo%20Aguirre%2C%2034%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Hamburguesa vegana","t":"vegan"},{"n":"Ensalada de burrata con tomate","t":"veg"}],"desc":"Hamburguesería que adapta sus recetas a versión vegana. Carta consistente.","note":null,"price":null,"hours":[[[10,24]],[[9.5,24]],[[9.5,24]],[[9.5,24]],[[9.5,24]],[[9.5,24]],[[9.5,24]]],"web":null},{"k":"la-urbana-2","n":"La Urbana · Augas Férreas","cat":"hamburguesas","catL":"Hamburguesas","img":"1550547660-d9054522f887","fb":"🍔","rating":null,"vs":3,"coords":[43.0063,-7.5512],"addr":"Praza Augas Férreas","maps":"https://www.google.com/maps/search/?api=1&query=La%20Urbana%20%C2%B7%20Augas%20F%C3%A9rreas%2C%20Praza%20Augas%20F%C3%A9rreas%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Hamburguesa vegana","t":"vegan"},{"n":"Ensalada de burrata con tomate","t":"veg"}],"desc":"Segundo local de La Urbana junto al río Miño. Misma carta vegana.","note":null,"price":null,"hours":[[[10,24]],[[9.5,24]],[[9.5,24]],[[9.5,24]],[[9.5,24]],[[9.5,24]],[[10,24]]],"web":null},{"k":"ramen-shifu","n":"Ramen Shifu Lugo","cat":"asiatico","catL":"Asiático","img":"1569718212165-3a8278d5f624","fb":"🍜","rating":null,"vs":3,"coords":[43.0161291,-7.5595739],"addr":"Av. da Coruña, 50","maps":"https://www.google.com/maps/search/?api=1&query=Ramen%20Shifu%20Lugo%2C%20Av.%20da%20Coru%C3%B1a%2C%2050%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Ramen vegano (caldo de verduras, tofu, algas, setas)","t":"vegan"},{"n":"Ramen vegetariano (huevo, tofu, bambú, setas)","t":"veg"},{"n":"Edamame al vapor con sal marina","t":"vegan"}],"desc":"Ramen japonés catalogado por Google como apto para veganos y vegetarianos.","note":null,"price":null,"hours":[[[13.25,16.5],[20.5,23.5]],[],[[20.5,23.5]],[[13.25,16.5],[20.5,23.5]],[[13.25,16.5],[20.5,23.5]],[[13.25,16.5],[20.5,24]],[[13.25,16.5],[20.5,24]]],"web":null},{"k":"sibuya","n":"Sibuya Urban Sushi Bar","cat":"asiatico","catL":"Asiático","img":"1553621042-f6e147245754","fb":"🍣","rating":null,"vs":3,"coords":[43.0101396,-7.5587222],"addr":"Rúa do Miño, 2-4","maps":"https://www.google.com/maps/search/?api=1&query=Sibuya%20Urban%20Sushi%20Bar%2C%20R%C3%BAa%20do%20Mi%C3%B1o%2C%202-4%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Kappa maki — roll de pepino","t":"vegan"},{"n":"Rolls de aguacate","t":"vegan"},{"n":"Edamame con sal marina","t":"vegan"},{"n":"Ensalada de algas","t":"vegan"},{"n":"Philadelphia roll (queso crema y pepino)","t":"veg"}],"desc":"Sushi japonés de cadena. Varias reseñas confirman buenas opciones vegetarianas.","note":null,"price":null,"hours":[[[13.5,16],[20.5,23.25]],[[13.5,16],[20.5,23.25]],[[13.5,16],[20.5,23.25]],[[13.5,16],[20.5,23.25]],[[13.5,16],[20.5,23.25]],[[13.5,16],[20.5,24.25]],[[13.5,16],[20.5,24.25]]],"web":"https://www.sibuya.com"},{"k":"el-sagrado","n":"El Sagrado Taquería","cat":"mexicano","catL":"Mexicano","img":"1565299507177-b0ac66763828","fb":"🌮","rating":null,"vs":4,"coords":[43.0083959,-7.5519545],"addr":"Rúa das Hermanitas, 1 (Bajo)","maps":"https://www.google.com/maps/search/?api=1&query=El%20Sagrado%20Taquer%C3%ADa%2C%20R%C3%BAa%20das%20Hermanitas%2C%201%20%28Bajo%29%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Taco vegano con salsa de arándanos y cacahuete picante","t":"vegan"},{"n":"Opciones veganas sin gluten (consultar carta)","t":"vegan"}],"desc":"Tacos mexicanos con opciones sin gluten y veganas. El taco de arándanos y cacahuete es el favorito.","note":null,"price":null,"hours":[[[14,16],[20,23]],[],[],[],[[14,16],[20,23]],[[14,16],[20,23]],[[14,16],[20,23]]],"web":null},{"k":"royal-tandoori","n":"Royal Tandoori","cat":"indio","catL":"Indio","img":"1546069901-5ec0a9a7c003","fb":"🍛","rating":null,"vs":2,"coords":[43.0121599,-7.5516139],"addr":"Rúa Rafael de Vega Doutor, 1","maps":"https://www.google.com/maps/search/?api=1&query=Royal%20Tandoori%2C%20R%C3%BAa%20Rafael%20de%20Vega%20Doutor%2C%201%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Vegetable Korma — curry de verduras con coco","t":"veg"},{"n":"Dal de lentejas rojas con especias","t":"vegan"},{"n":"Saag Paneer — espinacas con queso indio","t":"veg"},{"n":"Arroz basmati","t":"vegan"},{"n":"Naan de ajo (pedir sin ghee)","t":"veg"}],"desc":"Restaurante indio con curry de verduras confirmado. Rico en opciones vegetarianas por tradición.","note":"Preguntar qué platos no llevan ghee para opciones veganas.","price":null,"hours":[[[12.5,16.5],[19.5,24]],[],[[12.5,16.5],[19.5,24]],[[12.5,16.5],[19.5,24]],[[12.5,16.5],[19.5,24]],[[12.5,16.5],[19.5,24]],[[12.5,16.5],[19.5,24]]],"web":null},{"k":"biobocado","n":"Biobocado","cat":"ecologico","catL":"Ecológico","img":"1540189549336-e6e99eb4b45c","fb":"🥦","rating":null,"vs":4,"coords":[43.01455,-7.5571037],"addr":"Ronda da Muralla, 76","maps":"https://www.google.com/maps/search/?api=1&query=Biobocado%2C%20Ronda%20da%20Muralla%2C%2076%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Lasaña vegetal ecológica (la más recomendada)","t":"vegan"},{"n":"Platos del día veganos (rotan a diario)","t":"vegan"},{"n":"Platos vegetarianos con lácteos ecológicos","t":"veg"}],"desc":"Comida ecológica para llevar con vistas a la muralla. Lunes a viernes 12:00–16:00.","note":"Carta sin publicar — acercarse a ver qué hay.","price":null,"hours":[[],[[12,16]],[[12,16]],[[12,16]],[[12,16]],[[12,16]],[]],"web":null},{"k":"dominos","n":"Domino's Pizza","cat":"pizzeria","catL":"Pizzería","img":"1574071318508-1cdbab80d002","fb":"🍕","rating":"3.9","vs":2,"coords":[43.01124,-7.55275],"addr":"Ronda da Muralla, 27","maps":"https://www.google.com/maps/search/?api=1&query=Domino%27s%20Pizza%2C%20Ronda%20da%20Muralla%2C%2027%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Pizza Margherita (tomate, mozzarella)","t":"veg"},{"n":"Pizza personalizable sin carne (champiñón, cebolla, pimiento, maíz, aceitunas)","t":"veg"},{"n":"Opciones sin gluten disponibles","t":"veg"}],"desc":"Cadena americana junto a la muralla romana. Abierta hasta medianoche todos los días. Se puede personalizar cualquier pizza sin carne.","note":null,"price":null,"hours":[[[12.5,24]],[[12.5,24]],[[12.5,24]],[[12.5,24]],[[12.5,24]],[[12.5,24]],[[12.5,24]]],"web":"https://www.dominos.es"},{"k":"taco-bell","n":"Taco Bell","cat":"mexicano","catL":"Mexicano","img":"1565299507177-b0ac66763828","fb":"🌮","rating":"4.5","vs":4,"coords":[43.0374604,-7.5694433],"addr":"C.C. As Termas, Av. Infanta Elena, 213","maps":"https://www.google.com/maps/search/?api=1&query=Taco%20Bell%2C%20C.C.%20As%20Termas%2C%20Av.%20Infanta%20Elena%2C%20213%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Burrito con carne vegana (avena, habas y guisantes) — certificada","t":"vegan"},{"n":"Crunchwrap con carne vegana (pedir sin crema agria para opción vegana)","t":"veg"},{"n":"Nachos con queso y salsa","t":"veg"},{"n":"Cualquier producto puede pedirse sin carne (frijoles en vez de carne)","t":"veg"}],"desc":"Cadena tex-mex en el C.C. As Termas (4.5★, 634 reseñas). En España tienen carne vegana certificada de avena, habas y guisantes. Toda la carta se puede pedir vegetariana.","note":"En C.C. As Termas, unos 4 km al norte del centro.","price":"Menús desde 6,75 €","hours":[[[12,23.5]],[[12.5,23]],[[12.5,23]],[[12.5,23]],[[12.5,23]],[[12.5,24]],[[12,24]]],"web":"https://www.tacobell.es"},{"k":"nacion-green","n":"Nación Pizza & Pasta. Green","cat":"pizzeria","catL":"Pizzería","img":"1564936281291-294551497d81","fb":"🍕","rating":"3.8","vs":3,"coords":[43.0373935,-7.5692328],"addr":"C.C. As Termas, Av. Infanta Elena, 213","maps":"https://www.google.com/maps/search/?api=1&query=Naci%C3%B3n%20Pizza%20%26%20Pasta.%20Green%2C%20C.C.%20As%20Termas%2C%20Av.%20Infanta%20Elena%2C%20213%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Pizzas ecológicas vegetarianas (Margherita y temporada)","t":"veg"},{"n":"Lasaña vegetariana (confirmada en reseñas)","t":"veg"},{"n":"Pastas vegetarianas con ingredientes orgánicos","t":"veg"},{"n":"Sopa de calabaza (destacada en reseñas)","t":"vegan"},{"n":"Ensaladas ecológicas variadas","t":"veg"}],"desc":"Cadena gallega ecológica con más del 80% de ingredientes orgánicos, sin conservantes ni colorantes. Opciones vegetarianas confirmadas. También opciones sin gluten.","note":"En C.C. As Termas, unos 4 km al norte del centro.","price":"Pizzas desde ~8 €","hours":[[[13,23.5]],[[13,23.5]],[[13,23.5]],[[13,23.5]],[[13,23.5]],[[13,24.5]],[[13,24.5]]],"web":null},{"k":"nacion-poke","n":"Nación Poke","cat":"saludable","catL":"Saludable","img":"1512621776951-a57141f2eefd","fb":"🥗","rating":"4.8","vs":4,"coords":[43.0166103,-7.5602987],"addr":"Av. da Coruña, 53","maps":"https://www.google.com/maps/search/?api=1&query=Naci%C3%B3n%20Poke%2C%20Av.%20da%20Coru%C3%B1a%2C%2053%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Poke bowl vegano (arroz + edamame + aguacate + tofu + toppings a elegir)","t":"vegan"},{"n":"Poke bowl vegetariano con múltiples toppings personalizables","t":"veg"},{"n":"Mousse de fresas (postre)","t":"veg"}],"desc":"Poke bowls hawaianos con gran variedad de ingredientes (4.8★, 126 reseñas). Porciones generosas y personal muy amable que explica todas las opciones.","note":"Cerrado los martes.","price":null,"hours":[[[12.5,15.5],[20.25,23]],[[12.5,15.5],[20.25,23]],[],[[12.5,15.5],[20.25,23]],[[12.5,15.5],[20.25,23]],[[12.5,15.5],[20.25,23.5]],[[12.5,15.5],[20.25,23.5]]],"web":null},{"k":"malizzia","n":"MALIZZIA Street Food","cat":"hamburguesas","catL":"Hamburguesas","img":"1568901346375-23c9450c58cd","fb":"🍔","rating":"4.2","vs":3,"coords":[43.0099564,-7.5586915],"addr":"Praza do Campo, 8","maps":"https://www.google.com/maps/search/?api=1&query=MALIZZIA%20Street%20Food%2C%20Praza%20do%20Campo%2C%208%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Burger vegana (“The vegan burgers were fantastic” — reseña verificada)","t":"vegan"},{"n":"Nachos con guacamole","t":"vegan"},{"n":"Tacos vegetarianos","t":"veg"},{"n":"Tequenos vegetarianos","t":"veg"}],"desc":"Street food en la Praza do Campo. Reseñas confirman burgers veganas excelentes y piaña de pistachos de postre. Con cada bebida ponen tapas. Los fines de semana abren hasta las 2:30h.","note":null,"price":null,"hours":[[[12.5,16.25],[19,24]],[[13,16],[19.5,24]],[[13,16],[19.5,24]],[[12.5,16],[19.5,24]],[[12.5,16],[19.5,24]],[[12.5,24]],[[12.5,24]]],"web":null},{"k":"chino-shanghai","n":"Restaurante Chino Shanghai","cat":"asiatico","catL":"Asiático","img":"1553621042-f6e147245754","fb":"🥢","rating":"4.2","vs":2,"coords":[43.0068998,-7.5514526],"addr":"Rúa San Roque, 62-64 (Bajo)","maps":"https://www.google.com/maps/search/?api=1&query=Restaurante%20Chino%20Shanghai%2C%20R%C3%BAa%20San%20Roque%2C%2062-64%20%28Bajo%29%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Verduras mixtas salteadas (muy recomendadas en reseñas)","t":"vegan"},{"n":"Rollitos de primavera vegetarianos caseros","t":"vegan"},{"n":"Arroz frito de verduras","t":"vegan"},{"n":"Sopa agridulce vegetariana","t":"veg"}],"desc":"Restaurante chino clásico junto a Rúa San Roque. Las verduras mixtas y los rollitos caseros son lo más destacado según reseñas. Menú del día muy económico.","note":"Cerrado los miércoles.","price":"Menú del día 7,95 €","hours":[[[12,16],[20,24]],[[12,16],[20,24]],[[12,16],[20,24]],[],[[12,16],[20,24]],[[12,16],[20,24]],[[12,16],[20,24]]],"web":null},{"k":"tele-istanbul","n":"Tele Istanbul Döner Kebab","cat":"kebab","catL":"Kebab","img":"1604152135547-b420d99b42d8","fb":"🥙","rating":"4.9","vs":2,"coords":[43.0059856,-7.5548055],"addr":"Rúa Doutor Fleming, 3 (Bajo)","maps":"https://www.google.com/maps/search/?api=1&query=Tele%20Istanbul%20D%C3%B6ner%20Kebab%2C%20R%C3%BAa%20Doutor%20Fleming%2C%203%20%28Bajo%29%2C%20Lugo%2C%20Galicia","dishes":[{"n":"Falafel (confirmado en reseñas de clientes)","t":"vegan"},{"n":"Durum / wrap de falafel","t":"vegan"},{"n":"Menú falafel con patatas","t":"vegan"}],"desc":"El kebab mejor valorado de Lugo (4.9★, más de 1.100 reseñas). Falafel confirmado. Muy popular entre peregrinos del Camino de Santiago por sus porciones generosas y precio.","note":null,"price":null,"hours":[[[12.5,16.5],[19,24]],[[12.5,16.5],[19,24]],[[12.5,16.5],[19,24]],[[12.5,16.5],[19,24]],[[12.5,16.5],[19,24]],[[12.5,16.5],[19,24]],[[12.5,16.5],[19,24]]],"web":null},{"k":"full-sushi","n":"Full Sushi","cat":"asiatico","catL":"Asiático","img":"1553621042-f6e147245754","fb":"🍣","rating":"4.8","vs":3,"coords":[42.995765,-7.544725],"addr":"Av. de Madrid, 134","maps":"https://www.google.com/maps/search/?api=1&query=Full%20Sushi%2C%20Av.%20de%20Madrid%2C%20134%2C%20Lugo%2C%20Galicia","web":null,"dishes":[{"n":"Kappa maki — roll de pepino","t":"vegan"},{"n":"Rolls de aguacate y pepino","t":"vegan"},{"n":"Edamame al vapor con sal marina","t":"vegan"},{"n":"Philadelphia roll (queso crema + pepino)","t":"veg"},{"n":"Sashimi vegetal de temporada","t":"veg"}],"desc":"Uno de los sushi más valorados de Lugo (4.8★, más de 1.100 reseñas). Alta calidad y buen servicio. Abierto todos los días.","note":null,"price":null,"hours":[[[13,16.5],[20.5,23.5]],[[13,16.5],[20.5,23.5]],[[13,16.5],[20.5,23.5]],[[13,16.5],[20.5,23.5]],[[13,16.5],[20.5,23.5]],[[13,16.5],[20.5,23.5]],[[13,16.5],[20.5,23.5]]]},{"k":"samo-sushi","n":"Samo Sushi","cat":"asiatico","catL":"Asiático","img":"1553621042-f6e147245754","fb":"🍣","rating":"4.3","vs":3,"coords":[43.0369467,-7.5697534],"addr":"Av. Infanta Elena, 21","maps":"https://www.google.com/maps/search/?api=1&query=Samo%20Sushi%2C%20Av.%20Infanta%20Elena%2C%2021%2C%20Lugo%2C%20Galicia","web":null,"dishes":[{"n":"Kappa maki — roll de pepino","t":"vegan"},{"n":"Rolls de aguacate","t":"vegan"},{"n":"Edamame","t":"vegan"},{"n":"Philadelphia roll (queso crema + pepino)","t":"veg"}],"desc":"Sushi japonés con robot de reparto en sala (4.3★, 585 reseñas). Producto fresco y buena presentación. En el barrio de As Termas.","note":null,"price":null,"hours":[[[13,17],[20,24]],[[13,17],[20,24]],[[13,17],[20,24]],[[13,17],[20,24]],[[13,17],[20,24]],[[13,17],[20,24]],[[13,17],[20,24]]]},{"k":"hope-cafe","n":"Hope Café","cat":"cafe","catL":"Café","img":"1495474472-28781863417d","fb":"☕","rating":"4.4","vs":3,"coords":[43.0135485,-7.5605458],"addr":"Rúa Nova, 127","maps":"https://www.google.com/maps/search/?api=1&query=Hope%20Caf%C3%A9%2C%20R%C3%BAa%20Nova%2C%20127%2C%20Lugo%2C%20Galicia","web":null,"dishes":[{"n":"Café de especialidad vegano (con leche de avena, soja o almendra)","t":"vegan"},{"n":"Tostadas veganas con toppings variados","t":"vegan"},{"n":"Brunch vegetariano (huevos, aguacate, etc.)","t":"veg"},{"n":"Bollería sin gluten","t":"veg"}],"desc":"Café de especialidad con terraza-jardín y vistas a la muralla romana (4.4★). Muy recomendado por peregrinos para desayuno y brunch. Opciones sin gluten y veganas.","note":"Cerrado los lunes.","price":null,"hours":[[[9,14]],[],[[9,21]],[[9,21]],[[9,21]],[[9,21]],[[9,21]]]},{"k":"koa-poke","n":"Koa Poke","cat":"saludable","catL":"Saludable","img":"1546069901-5ec0a9a7c003","fb":"🥗","rating":"4.7","vs":4,"coords":[43.0371727,-7.5688405],"addr":"C.C. As Termas, Av. Infanta Elena, 213","maps":"https://www.google.com/maps/search/?api=1&query=Koa%20Poke%2C%20C.C.%20As%20Termas%2C%20Av.%20Infanta%20Elena%2C%20213%2C%20Lugo%2C%20Galicia","web":null,"dishes":[{"n":"Poke bowl vegano (arroz, edamame, aguacate, tofu, algas y toppings)","t":"vegan"},{"n":"Acai bowl vegano","t":"vegan"},{"n":"Poke bowl vegetariano personalizable","t":"veg"},{"n":"Nachos (con opciones sin carne)","t":"veg"}],"desc":"Cadena de poke bowls hawaianos en C.C. As Termas (4.7★, 176 reseñas). Kiosco de auto-pedido para más rapidez. Muy valorado por apto para celíacos.","note":"En C.C. As Termas, unos 4 km al norte del centro.","price":null,"hours":[[[11.5,23]],[[11.5,23]],[[11.5,23]],[[11.5,23]],[[11.5,23]],[[11.5,23.5]],[[11.5,23.5]]]},{"k":"glam-root","n":"Glam Root","cat":"asiatico","catL":"Asiático","img":"1563245372-f338bc274f8a","fb":"🍲","rating":"4.8","vs":2,"coords":[43.0104334,-7.5598026],"addr":"Rúa do Miño, 28","maps":"https://www.google.com/maps/search/?api=1&query=Glam%20Root%2C%20R%C3%BAa%20do%20Mi%C3%B1o%2C%2028%2C%20Lugo%2C%20Galicia","web":null,"dishes":[{"n":"Gyozas vegetarianas al vapor","t":"veg"},{"n":"Tacos vegetarianos","t":"veg"},{"n":"Pimientos rellenos (verificar ingredientes)","t":"veg"},{"n":"Alcachofa a la brasa (entrada vegetariana)","t":"veg"}],"desc":"Restaurante de cocina fusión en la Rúa do Miño (4.8★, 109 reseñas). Menú creativo con gyozas, tacos y pimientos rellenos. El Alfredo sirve con increíble amabilidad.","note":"Confirmar ingredientes de cada plato para versión 100% vegana.","price":null,"hours":[[[13,17],[20,24]],[[13,17],[20,24]],[[13,17],[20,24]],[[13,17],[20,24]],[[13,17],[20,24]],[[13,17],[20,24]],[[13,17],[20,24]]]},{"k":"burger-king-1","n":"Burger King","cat":"hamburguesas","catL":"Hamburguesas","img":"1568901346375-23c9450c58cd","fb":"🍔","rating":"4.5","vs":3,"coords":[42.995715,-7.541975],"addr":"Rúa Fonte da Bica (junto a Av. de Madrid)","maps":"https://www.google.com/maps/search/?api=1&query=Burger%20King%2C%20R%C3%BAa%20Fonte%20da%20Bica%20%28junto%20a%20Av.%20de%20Madrid%29%2C%20Lugo%2C%20Galicia","web":"https://www.burgerking.es","dishes":[{"n":"Plant-Based Whopper (hamburguesa vegana)","t":"vegan"},{"n":"Plant-Based Long Chicken (pollo vegano)","t":"vegan"},{"n":"Vegetal Nuggets (sin carne)","t":"vegan"},{"n":"Onion Rings","t":"vegan"},{"n":"Ensalada de temporada sin pollo","t":"vegan"}],"desc":"Burger King en Lugo sur (4.5★, catalogado como restaurante vegano en Google). Tienen carta de productos 100% vegetal en España con planta-based certificado.","note":null,"price":"Menús desde 5 €","hours":[[[12,24]],[[12,24]],[[12,24]],[[12,24]],[[12,24]],[[12,24]],[[12,24]]]},{"k":"burger-king-2","n":"Burger King (As Termas)","cat":"hamburguesas","catL":"Hamburguesas","img":"1550547660-d9054522f887","fb":"🍔","rating":"3.7","vs":3,"coords":[43.03732,-7.569181],"addr":"C.C. As Termas, Av. Infanta Elena, 93","maps":"https://www.google.com/maps/search/?api=1&query=Burger%20King%20%28As%20Termas%29%2C%20C.C.%20As%20Termas%2C%20Av.%20Infanta%20Elena%2C%2093%2C%20Lugo%2C%20Galicia","web":"https://www.burgerking.es","dishes":[{"n":"Plant-Based Whopper (hamburguesa vegana)","t":"vegan"},{"n":"Plant-Based Long Chicken (pollo vegano)","t":"vegan"},{"n":"Vegetal Nuggets","t":"vegan"},{"n":"Onion Rings","t":"vegan"}],"desc":"Segundo Burger King de Lugo, en el C.C. As Termas (3.7★). Misma carta vegana/vegetariana que el otro local. Catalogado como restaurante vegano en Google.","note":"En C.C. As Termas. Una reseña menciona confusión entre burger vegana y de carne; verificar al recoger.","price":"Menús desde 5 €","hours":[[[12,24]],[[12,24]],[[12,24]],[[12,24]],[[12,24]],[[12,24]],[[12,24]]]}];
+const VS_LABELS={"5": "100% Vegano", "4": "Muy amigable", "3": "Platos veganos", "2": "Opciones veg.", "1": "Consultar"};
+const CAT_COLORS={"vegano": "#A3E635", "pizzeria": "#FBBF24", "italiano": "#FB923C", "hamburguesas": "#F87171", "asiatico": "#60A5FA", "mexicano": "#34D399", "indio": "#C084FC", "ecologico": "#86EFAC", "saludable": "#10B981", "cafe": "#F59E0B", "kebab": "#D97706"};
+
+const IU='https://images.unsplash.com/photo-',IQ='?w=740&h=460&auto=format&fit=crop&q=80';
+const DAYS=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const CATS=[
+  {k:'todos',l:'Todos'},{k:'vegano',l:'🌿 100% Vegano'},
+  {k:'pizzeria',l:'🍕 Pizzerías'},{k:'italiano',l:'🍝 Italiano'},
+  {k:'hamburguesas',l:'🍔 Hamburguesas'},{k:'asiatico',l:'🍣 Asiático'},
+  {k:'mexicano',l:'🌮 Mexicano'},{k:'indio',l:'🍛 Indio'},
+  {k:'ecologico',l:'🥦 Ecológico'},{k:'saludable',l:'🥗 Saludable'},
+  {k:'cafe',l:'☕ Café'},{k:'kebab',l:'🥙 Kebab'},{k:'favs',l:'❤ Favoritos'},
+];
+let activeCat='todos',currentView='list',mapInited=false,lugoMap=null;
+const markers={},favs=new Set();
+try{const s=localStorage.getItem('lugo_favs');if(s)JSON.parse(s).forEach(k=>favs.add(k));}catch(e){}
+function saveFavs(){try{localStorage.setItem('lugo_favs',JSON.stringify([...favs]));}catch(e){}}
+function ft(t){const h=Math.floor(t)%24,m=Math.round((t-Math.floor(t))*60);return h+':'+String(m).padStart(2,'0')}
+function getStatus(hours){
+  if(!hours)return{k:'unknown',l:'Horario sin confirmar'};
+  const n=new Date(),d=n.getDay(),t=n.getHours()+n.getMinutes()/60;
+  for(const[s,e]of(hours[d]||[]))if(t>=s&&t<e)return{k:'open',l:'Abierto \u00b7 cierra '+ft(e)+'h'};
+  for(const[s]of(hours[d]||[]))if(t<s)return{k:'closed',l:'Cerrado \u00b7 abre hoy '+ft(s)+'h'};
+  for(let i=1;i<=7;i++){const d2=(d+i)%7,iv=hours[d2]||[];if(iv.length)return{k:'closed',l:'Cerrado \u00b7 abre '+(i===1?'ma\u00f1ana':'el '+DAYS[d2])+' '+ft(iv[0][0])+'h'};}
+  return{k:'closed',l:'Cerrado'};
+}
+function norm(s){return s.toLowerCase().normalize('NFD').replace(/\p{Mn}/gu,'');}
+function imgErr(img){img.style.display='none';const c=img.closest('.cts');if(c)c.classList.add('img-err');}
+function leafSVG(on){return '<svg viewBox="0 0 10 14" width="11" height="14"><path d="M5 0Q0 3.5 0 8Q0 12.5 5 14Q10 12.5 10 8Q10 3.5 5 0Z" fill="'+(on?'#A3E635':'#223325')+'"/></svg>';}
+function leavesHtml(n){return Array.from({length:5},(_,i)=>leafSVG(i<n)).join('');}
+
+function card(p,i){
+  const st=getStatus(p.hours),isFav=favs.has(p.k);
+  const rH=p.rating?'<span class="rating">\u2605 '+p.rating+'</span>':'';
+  const dot=st.k==='open'?'<span class="sdot open"></span>':'<span class="sdot closed"></span>';
+  const stTxt=st.k==='unknown'?'<span class="stxt unknown">'+st.l+'</span>':dot+'<span class="stxt '+st.k+'">'+st.l+'</span>';
+  const dishes=p.dishes.map(d=>'<div class="dish"><span class="badge '+(d.t==='vegan'?'vn':'vg')+'">'+(d.t==='vegan'?'V':'Veg')+'</span><span>'+d.n+'</span></div>').join('');
+  const imgLink=p.web||p.maps;
+  const webTip=p.web?'Ver web':'Ver en Google Maps';
+  return '<article class="card" data-key="'+p.k+'" data-cat="'+p.cat+'" style="animation-delay:'+(i*.022)+'s">'+
+    '<div class="cts">'+
+      '<a href="'+imgLink+'" target="_blank" rel="noopener" class="ci-link" title="'+webTip+'">'+
+        '<img class="ci" src="'+IU+p.img+IQ+'" alt="" loading="lazy" onerror="imgErr(this)">'+
+      '</a>'+
+      '<span class="cif">'+p.fb+'</span>'+
+      '<div class="cov"></div>'+
+      '<button class="hb'+(isFav?' fav':'')+'" data-fav="'+p.k+'">'+(isFav?'❤️':'🤍')+'</button>'+
+      '<div class="ctb"><span class="tag">'+p.catL+'</span></div>'+
+      '<div class="cns">'+
+        '<div class="mrow">'+stTxt+rH+'</div>'+
+        '<div class="vsc"><div class="lvs">'+leavesHtml(p.vs)+'</div><span class="vsl">'+VS_LABELS[p.vs]+'</span></div>'+
+        '<h2><a href="'+p.maps+'" target="_blank" rel="noopener">'+p.n+' <span class="ar">\u2197</span></a></h2>'+
+        '<p class="adr">\uD83D\uDCCD '+p.addr+'</p>'+
+      '</div>'+
+    '</div>'+
+    '<div class="cds">'+
+      '<p class="dlbl">Qu\u00e9 pedir</p>'+
+      '<div class="dl">'+dishes+'</div>'+
+      (p.desc?'<p class="desc">'+p.desc+'</p>':'')+
+      (p.note?'<span class="note">\u26a0 '+p.note+'</span>':'')+
+      (p.price?'<p class="price">'+p.price+'</p>':'')+
+    '</div>'+
+  '</article>';
+}
+
+function toggleFav(key){
+  if(favs.has(key))favs.delete(key);else favs.add(key);
+  saveFavs();
+  document.querySelectorAll('.hb[data-fav="'+key+'"]').forEach(b=>{b.textContent=favs.has(key)?'❤️':'🤍';b.classList.toggle('fav',favs.has(key));});
+  updateFavChip();if(activeCat==='favs')applyFilter();updateStats();
+}
+function updateFavChip(){
+  const c=document.querySelector('.chip[data-cat="favs"]');
+  if(!c)return;c.style.display=favs.size>0?'':'none';
+  c.textContent='\u2764 Favoritos'+(favs.size>0?' ('+favs.size+')':'');
+}
+function updateStats(){
+  const open=P.filter(p=>getStatus(p.hours).k==='open').length;
+  const pizza=P.filter(p=>p.cat==='pizzeria').length;
+  document.getElementById('sbar').innerHTML=
+    '<div class="st"><strong>'+P.length+'</strong> locales</div>'+
+    '<div class="st"><span class="odot"></span> <strong>'+open+'</strong> abiertos ahora</div>'+
+    '<div class="st"><strong>'+pizza+'</strong> pizzer\u00edas</div>'+
+    (favs.size>0?'<div class="st">\u2764 <strong>'+favs.size+'</strong> guardados</div>':'');
+}
+function applyFilter(){
+  const q=norm(document.getElementById('srch').value.trim());
+  let vis=0;
+  document.querySelectorAll('.card').forEach(c=>{
+    const p=P.find(x=>x.k===c.dataset.key);if(!p)return;
+    const mc=activeCat==='todos'||(activeCat==='favs'?favs.has(p.k):p.cat===activeCat);
+    const hay=norm([p.n,p.desc||'',p.catL,...p.dishes.map(d=>d.n)].join(' '));
+    const show=mc&&(q===''||hay.includes(q));
+    c.style.display=show?'':'none';if(show)vis++;
+    if(markers[p.k]){try{if(show)markers[p.k].addTo(lugoMap);else markers[p.k].remove();}catch(e){}}
+  });
+  document.getElementById('cbar').textContent=vis+(vis===1?' local':' locales');
+  document.getElementById('empty').style.display=vis===0?'block':'none';
+}
+function setView(v){
+  currentView=v;
+  document.getElementById('bl').classList.toggle('active',v==='list');
+  document.getElementById('bm').classList.toggle('active',v==='map');
+  document.getElementById('vl').classList.toggle('gone',v==='map');
+  document.getElementById('vm').classList.toggle('show',v==='map');
+  if(v==='map'&&!mapInited)initMap();
+  else if(v==='map'&&lugoMap)setTimeout(()=>lugoMap.invalidateSize(),80);
+}
+function initMap(){
+  mapInited=true;
+  if(typeof L==='undefined'){document.getElementById('merr').style.display='block';return;}
+  lugoMap=L.map('map',{zoomControl:true}).setView([43.010,-7.556],13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'\u00a9 OpenStreetMap',maxZoom:19}).addTo(lugoMap);
+  P.forEach(p=>{
+    const col=CAT_COLORS[p.cat]||'#A3E635';
+    const m=L.circleMarker(p.coords,{radius:10,fillColor:col,color:'#fff',weight:2.5,fillOpacity:.92});
+    m.bindPopup('<b style="font-family:Georgia,serif;font-size:.95rem">'+p.n+'</b><br><small style="color:#7DAB79">'+p.addr+'</small><br><div style="margin:4px 0">'+leavesHtml(p.vs)+'</div><a href="'+p.maps+'" target="_blank" style="color:#A3E635;font-size:.78rem">Google Maps \u2197</a>',{maxWidth:210});
+    markers[p.k]=m;m.addTo(lugoMap);
+  });
+}
+const listEl=document.getElementById('list');
+listEl.innerHTML=P.map(card).join('');
+listEl.addEventListener('click',function(e){
+  const hb=e.target.closest('.hb');
+  if(hb){e.stopPropagation();toggleFav(hb.dataset.fav);}
+});
+const chipsEl=document.getElementById('chips');
+chipsEl.innerHTML=CATS.map(c=>'<button class="chip" data-cat="'+c.k+'" aria-pressed="'+(c.k==='todos')+'"'+(c.k==='favs'?' style="display:none"':'')+'>'+c.l+'</button>').join('');
+chipsEl.addEventListener('click',e=>{
+  const b=e.target.closest('.chip');if(!b)return;
+  activeCat=b.dataset.cat;
+  document.querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.cat===activeCat)));
+  applyFilter();
+});
+document.getElementById('srch').addEventListener('input',applyFilter);
+document.getElementById('bl').addEventListener('click',()=>setView('list'));
+document.getElementById('bm').addEventListener('click',()=>setView('map'));
+updateFavChip();updateStats();applyFilter();
+setInterval(updateStats,60000);
+
+</script>
+</body>
+</html>
